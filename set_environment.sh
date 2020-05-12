@@ -36,9 +36,9 @@ eval $(parse_yaml conf/environment.yml "config_")
 
 # Verbose output
 function verbose () {
-    if [[ $verbose -eq 1 ]]; then
-        echo "$@"
-    fi
+  if [[ $verbose -eq 1 ]]; then
+    echo "$@"
+  fi
 }
 
 
@@ -47,10 +47,8 @@ verbose "********************************"
 verbose "****** Full config file ********"
 verbose "********************************"
 verbose ""
-verbose "config Schluckenau"
+verbose "config home (W)LAN1"
 verbose "  $config_schluckenau_ssid"
-verbose "config Maeusberg"
-verbose "  $config_maeusberg_ssid"
 verbose "config nas"
 verbose "  $config_nas_homedrive"
 verbose "  $config_nas_mountpoint"
@@ -98,7 +96,7 @@ if [ $ssid == "$config_schluckenau_ssid" ]
           else
             verbose "Unable to mount home drive! Exiting..."
           exit 1
-      fi
+        fi
     fi
   else
     verbose ""
@@ -113,8 +111,9 @@ if [ $ssid == "$config_schluckenau_ssid" ]
           then
             verbose "nmcli con up id '${config_vpn_vconnection}'"
             exit 0
-        else
-          nmcli con up id "${config_vpn_vconnection}"
+          else
+            nmcli con up id "${config_vpn_vconnection}"
+        fi
     fi
     # Check if tunnel is active
     if [ $? -eq 0 ]
@@ -128,13 +127,22 @@ if [ $ssid == "$config_schluckenau_ssid" ]
           then 
             verbose "sudo mount -t cifs --verbose -o user=$config_nas_user,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint"
             exit 0
-      else
-        verbose ""
-	verbose "Tunnel could not be started. Please check that! Exiting..."
-        verbose ""
-        exit 1
+          else
+            sudo mount -t cifs --verbose -o user=$config_nas_user,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint
+            if [ $? -eq 0 ]
+              then
+                verbose "Done!"
+                exit 0
+              else
+                verbose "Unable to mount home drive! Exiting..."
+                exit 1
+            fi
+            verbose ""
+	    verbose "Tunnel could not be started. Please check that! Exiting..."
+            verbose ""
+            exit 1
+        fi
     fi
-  fi
 fi
 
 exit 0
