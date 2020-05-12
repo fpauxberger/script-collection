@@ -6,13 +6,13 @@
 # 
 # Possible options:
 #   -v	Sets the output to verbose
-#   -d	Script runs in debug mode
+#   -d	Script runs in debug mode only
 #
 
 verbose=0
 debug=0
 
-while getopts "v" OPTION
+while getopts "v d" OPTION
 do
   case $OPTION in
     v) verbose=1
@@ -21,6 +21,13 @@ do
        ;;
   esac
 done
+
+# Read yml config file
+# Thank you to Piotr Kuczynski: https://gist.github.com/pkuczynski/8665367
+. parse_yaml.sh
+
+# read yaml file
+eval $(parse_yaml conf/environment.yml "config_")
 
 
 #
@@ -34,30 +41,28 @@ function verbose () {
     fi
 }
 
-# Debug run only
-function debug () {
-    if [[ $debug -eq 1 ]]; then
-        echo "$@"
-    fi
-}
 
-### ARGV0=$0 # First argument is shell command (as in C)
-### verbose "Command: $ARGV0"
-### 
-### ARGC=$#  # Number of args, not counting $0
-### verbose "Number of args: $ARGC"
-### 
-### i=1  # Used as argument index
-### while true; do
-### 	if [ $1 ]; then
-### 		echo "Argv[$i] = $1" # Always print $1, shifting $2 into $1 later
-### 		shift
-### 	else
-### 		break # Stop loop when no more args.
-### 	fi
-### 	i=$((i+1))
-### done
-### verbose "Done."
+verbose ""
+verbose "********************************"
+verbose "****** Full config file ********"
+verbose "********************************"
+verbose ""
+verbose "config Schluckenau"
+verbose "  $config_schluckenau_ssid"
+verbose "config Maeusberg"
+verbose "  $config_maeusberg_ssid"
+verbose "config nas"
+verbose "  $config_nas_homedrive"
+verbose "  $config_nas_mountpoint"
+verbose "  $config_nas_user"
+verbose "config local"
+verbose "  $config_luser_luid"
+verbose "  $config_luser_lgid"
+verbose "config vpn"
+verbose "  $config_vpn_vconnection"
+verbose ""
+verbose "********************************"
+verbose ""
 
 
 #
@@ -65,70 +70,71 @@ function debug () {
 #
 active_card=`ip link sho | grep w | awk '{print substr($2, 1, length($2)-1)}'`
 ssid=`nmcli | grep $active_card | awk '{print $4}'`
+myip=`ip route get 8.8.4.4 | head -1 | awk '{print $7}'`
 
-verbose "Connected to $ssid on interface: $active_card."
+verbose ""
+verbose "Connected to $ssid on interface: $active_card and my IP is $myip."
+verbose ""
 
+#
+# If @home mount NAS. If not start vpn tunnel first and then mount NAS
+#
 
-# If in LAN @home mount NAS. If not start vpn tunnel first
-# and then mount NAS
+if [ $ssid == "$config_schluckenau_ssid" ]
+  then
+    verbose ""
+    verbose "--> Seems you are in Schluckenau..."
+    verbose ""
 
-case $ssid in 
-
-  "FCP-Network" )
-
-  verbose "Seems you are in Schluckenau..."
-  # Mount nas
-  sudo mount -t cifs --verbose -o user=paux,uid=1000,gid=1000,nounix,vers=2.0 //nasdcb0ba/home /home/paux/nas/homedrive
-  
-  if [ $? -eq 0 ]
-    then
-      exit 0
+    if [[ $debug -eq 1 ]]
+      then 
+        verbose "sudo mount -t cifs --verbose -o user=$config_nas_user,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint"
+        exit 0
+      else 
+        sudo mount -t cifs --verbose -o user=$config_nas_user,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint
+        if [ $? -eq 0 ]
+          then
+            exit 0
+          else
+            verbose "Unable to mount home drive! Exiting..."
+          exit 1
+      fi
+    fi
   else
-    exit 1
+    verbose ""
+    verbose "You are connected to >$ssid<. This requires some more effort to mount your homedrive. Let's get it done..."
+    verbose ""
+
+    active_con=$(nmcli con | grep "$active_card")
+    activ_vpn=$(nmcli con | grep "$ssid")
+    if [ "${activ_con}" -a ! "${activ_vpn}" ];
+      then
+        if [[ $debug -eq 1 ]]
+          then
+            verbose "nmcli con up id '${config_vpn_vconnection}'"
+            exit 0
+        else
+          nmcli con up id "${config_vpn_vconnection}"
+    fi
+    # Check if tunnel is active
+    if [ $? -eq 0 ]
+      then
+        verbose ""
+        verbose "Tunnel successfully activated! Mountin NAS..."
+        verbose ""
+
+        sleep 2
+        if [[ $debug -eq 1 ]]
+          then 
+            verbose "sudo mount -t cifs --verbose -o user=$config_nas_user,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint"
+            exit 0
+      else
+        verbose ""
+	verbose "Tunnel could not be started. Please check that! Exiting..."
+        verbose ""
+        exit 1
+    fi
   fi
-  ;;
-
-/*
-
-REQUIRED_CONNECTION_NAME="<name-of-connection>"
-VPN_CONNECTION_NAME="<name-of-vpn-connection>"
-
-
-activ_con=$(nmcli con status | grep "${REQUIRED_CONNECTION_NAME}")
-activ_vpn=$(nmcli con status | grep "${VPN_CONNECTION_NAME}")
-if [ "${activ_con}" -a ! "${activ_vpn}" ];
-then
-    nmcli con up id "${VPN_CONNECTION_NAME}"
 fi
-
-*/
-
-
-
-
-
-
-
-
-
-
-
-  "MyHomeIsMyCastle" )
-
-  verbose "Looks like you are at Maeusberg"
-
-  # Start VPN
-  VPN_CONNECTION_NAME="Schluckenau"
-  activ_vpn=$(nmcli con | grep "${VPN_CONNECTION_NAME}")
-  if [ "${activ_con}" -a ! "${activ_vpn}" ];
-    then
-      nmcli con up id "${VPN_CONNECTION_NAME}"
-  fi
-
-  # Mount nas
-  sudo mount -t cifs --verbose -o user=paux,uid=1000,gid=1000,nounix,vers=2.0 //NASDCB0BA/home /home/paux/nas/homedrive
-  ;;
-
-esac
 
 exit 0
