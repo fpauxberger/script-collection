@@ -48,11 +48,12 @@ verbose "****** Full config file ********"
 verbose "********************************"
 verbose ""
 verbose "config home (W)LAN1"
-verbose "  $config_schluckenau_ssid"
+verbose "  $config_home_ssid"
 verbose "config nas"
 verbose "  $config_nas_homedrive"
 verbose "  $config_nas_mountpoint"
 verbose "  $config_nas_user"
+verbose "  $config_nas_password"
 verbose "config local"
 verbose "  $config_luser_luid"
 verbose "  $config_luser_lgid"
@@ -78,7 +79,7 @@ verbose ""
 # If @home mount NAS. If not start vpn tunnel first and then mount NAS
 #
 
-if [ $ssid == "$config_schluckenau_ssid" ]
+if [ "$ssid" == "$config_home_ssid" ]
   then
     verbose ""
     verbose "--> Seems you are in Schluckenau..."
@@ -86,16 +87,18 @@ if [ $ssid == "$config_schluckenau_ssid" ]
 
     if [[ $debug -eq 1 ]]
       then 
-        verbose "sudo mount -t cifs --verbose -o user=$config_nas_user,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint"
+        verbose "sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_user,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint"
         exit 0
       else 
-        sudo mount -t cifs --verbose -o user=$config_nas_user,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint
+        sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_password,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint
         if [ $? -eq 0 ]
           then
+            list=`ls -al $config_nas_mountpoint`
+            verbose "$list"
             exit 0
           else
             verbose "Unable to mount home drive! Exiting..."
-          exit 1
+            exit 1
         fi
     fi
   else
@@ -125,10 +128,10 @@ if [ $ssid == "$config_schluckenau_ssid" ]
         sleep 2
         if [[ $debug -eq 1 ]]
           then 
-            verbose "sudo mount -t cifs --verbose -o user=$config_nas_user,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint"
+            verbose "sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_password,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint"
             exit 0
           else
-            sudo mount -t cifs --verbose -o user=$config_nas_user,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint
+            sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_password,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint
             if [ $? -eq 0 ]
               then
                 verbose "Done!"
