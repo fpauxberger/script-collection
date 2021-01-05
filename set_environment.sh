@@ -23,7 +23,7 @@ do
 done
 
 # Read yml config file
-# Thank you to Piotr Kuczynski: https://gist.github.com/pkuczynski/8665367
+# A big thanks to Piotr Kuczynski: https://gist.github.com/pkuczynski/8665367
 . parse_yaml.sh
 
 # read yaml file
@@ -49,7 +49,9 @@ verbose "********************************"
 verbose ""
 verbose "config home (W)LAN1"
 verbose "  $config_home_ssid"
+verbose "  $config_home_network"
 verbose "config nas"
+verbose "  $config_nas_shortname"
 verbose "  $config_nas_homedrive"
 verbose "  $config_nas_mountpoint"
 verbose "  $config_nas_user"
@@ -62,6 +64,8 @@ verbose "  $config_vpn_vconnection"
 verbose ""
 verbose "********************************"
 verbose ""
+
+
 
 
 #
@@ -106,9 +110,11 @@ if [ "$ssid" == "$config_home_ssid" ]
     verbose "You are connected to >$ssid<. This requires some more effort to mount your homedrive. Let's get it done..."
     verbose ""
 
-    active_con=$(nmcli con | grep "$active_card")
-    activ_vpn=$(nmcli con | grep "$ssid")
-    if [ "${activ_con}" -a ! "${activ_vpn}" ];
+    ### active_con=$(nmcli con | grep "$active_card")
+    ### activ_vpn=$(nmcli con | grep "$ssid")
+
+    ### if [ "${activ_con}" -a ! "${activ_vpn}" ];
+    if [ "${ssid}" -a ! "${$config_home_ssid}" ];
       then
         if [[ $debug -eq 1 ]]
           then
@@ -125,13 +131,31 @@ if [ "$ssid" == "$config_home_ssid" ]
         verbose "Tunnel successfully activated! Mountin NAS..."
         verbose ""
 
+        sleep 1
+
+        verbose ""
+        verbose "Finding the IP of my NAS back in Schluckenau..."
+        verbose ""
+        #
+        # Quick and dirty hack to get the NAS mounted in a tunneled area - needs some more brain and time to make it nice
+        #
+        ipofnas=`nmap -T5 -sP $config_home_network | grep -i $config_nas_shortname | head -1 | awk {'print $6'}`
+        ipofnas=`echo "${ipofnas:1:${#string}-1}"`
+
+        verbose ""
+        verbose "My NAS in Schluckenau has got IP address: >$ipofnas<!"
+        verbose ""
+
+
         sleep 2
+
         if [[ $debug -eq 1 ]]
           then 
-            verbose "sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_password,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint"
+            ### verbose "sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_password,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint"
+            verbose "sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_password,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 //$ipofnas/home $config_nas_mountpoint"
             exit 0
           else
-            sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_password,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint
+            sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_password,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 //$ipofnas/home $config_nas_mountpoint
             if [ $? -eq 0 ]
               then
                 verbose "Done!"
