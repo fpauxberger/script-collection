@@ -70,4 +70,6 @@ echo "        In case you would like to run a fresh dkms build, remove all versi
 echo "        and then re-run this script."
 echo
 
+echo "funny output"
+
 exit 0
