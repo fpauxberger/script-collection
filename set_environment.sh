@@ -8,6 +8,7 @@
 #   -v	Sets the output to verbose
 #   -d	Script runs in debug mode only
 #
+# dummy
 
 verbose=0
 debug=0
