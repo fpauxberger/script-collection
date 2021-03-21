@@ -38,14 +38,14 @@ fi
 MODULEVERSION=`grep -i PACKAGE_VERSION $V4CONF | sed 's/[^0-9||.]*//g'`
 echo "  INFO: Found v4l2loopback module version >$MODULEVERSION<. Will work with that."
 KERNEL=`uname -r`
-echo "  INFO: Found kernel version >$KERNEL<. Will work with that."
+echo "  INFO: Found running kernel version >$KERNEL<. Will work with that."
 
 
 #
 # Rebuild kernel module if required
 #
 
-MOD_KERNEL=`dkms status | awk {'print $3'} | sed 's/,$//'` 
+MOD_KERNEL=`dkms status | awk {'print $3'} | sed 's/,$//' | tail -1` 
 if [ $KERNEL == $MOD_KERNEL ]
   then
     echo
