@@ -72,18 +72,28 @@ verbose ""
 # Find active wifi card and SSID
 #
 active_card=`ip link sho | grep w | awk '{print substr($2, 1, length($2)-1)}'`
+# See if we are connected via wifi
 ssid=`nmcli | grep $active_card | awk '{print $4}'`
-myip=`ip route get 8.8.4.4 | head -1 | awk '{print $7}'`
+if [ -z $ssid ] 
+  then
+    verbose ""
+    verbose "--> We are not connected to a Wifi!"
+    verbose ""
+    network=lan
+  else
+    myip=`ip route get 8.8.4.4 | head -1 | awk '{print $7}'`
+    verbose ""
+    verbose "Connected to $ssid on interface: $active_card and my IP is $myip."
+    verbose ""
+    network=wlan
+fi
 
-verbose ""
-verbose "Connected to $ssid on interface: $active_card and my IP is $myip."
-verbose ""
 
 #
 # If @home mount NAS. If not start vpn tunnel first and then mount NAS
 #
 
-if [ "$ssid" == "$config_home_ssid" ]
+if [ "$network == wlan" ] && [ "$ssid" == "$config_home_ssid" ]
   then
     verbose ""
     verbose "--> Seems you are in Schluckenau..."
