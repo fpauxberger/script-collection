@@ -101,9 +101,10 @@ if [ "$network == wlan" ] && [ "$ssid" == "$config_home_ssid" ]
 
     if [[ $debug -eq 1 ]]
       then 
-        verbose "sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_user,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint"
+        verbose "sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_password,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint"
         exit 0
       else 
+	verbose "sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_password,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint"
         sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_password,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint
         if [ $? -eq 0 ]
           then
