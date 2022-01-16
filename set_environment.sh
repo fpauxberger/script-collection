@@ -22,11 +22,12 @@ do
   esac
 done
 
+
 # Read yml config file
 # A big thanks to Piotr Kuczynski: https://gist.github.com/pkuczynski/8665367
 . parse_yaml.sh
 
-# read yaml file
+# read local config file
 eval $(parse_yaml conf/environment.yml "config_")
 
 
@@ -65,8 +66,16 @@ verbose ""
 verbose "********************************"
 verbose ""
 
+# Find network devices
+wificard=$(sudo lshw -class network -short | grep Wi-Fi | awk  '{ print $2 }')
+  ssid=$(nmcli device status | grep 'wifi.* connected' | awk '{ print $4 }')
+ethernetcard=$(sudo lshw -class network -short | grep Ethernet | awk  '{ print $2 }')
 
-
+###
+###
+### --->> hier gehts weiter
+###
+###
 
 #
 # Find active wifi card and SSID
