@@ -42,6 +42,14 @@ function verbose () {
   fi
 }
 
+# Debug run
+function debug () {
+  if [[ $debug -eq 1 ]]; then
+    echo "$@"
+  fi
+}
+
+
 
 verbose ""
 verbose "********************************"
@@ -67,35 +75,47 @@ verbose "********************************"
 verbose ""
 
 # Find network devices
+
 wificard=$(sudo lshw -class network -short | grep Wi-Fi | awk  '{ print $2 }')
   ssid=$(nmcli device status | grep 'wifi.* connected' | awk '{ print $4 }')
 ethernetcard=$(sudo lshw -class network -short | grep Ethernet | awk  '{ print $2 }')
+  lanid=$(nmcli device status | grep 'ethernet.* connected' | awk '{ print $4 }')
 
-###
-###
-### --->> hier gehts weiter
-###
-###
+verbose ""
+verbose "*** Network configuration dump ***"
+verbose ""
+verbose "Wireless card: >$wificard<"
+verbose "SSID: >$ssid<"
+verbose "Ethernet card: >ethernetcard=<"
+verbose "LANID: >$lanid<"
 
-#
-# Find active wifi card and SSID
-#
-active_card=`ip link sho | grep w | awk '{print substr($2, 1, length($2)-1)}'`
-# See if we are connected via wifi
-ssid=`nmcli | grep $active_card | awk '{print $4}'`
+
+# See if we are connected via wifi or LAN
+
 if [ -z $ssid ] 
   then
-    verbose ""
     verbose "--> We are not connected to a Wifi!"
-    verbose ""
     network=lan
   else
-    myip=`ip route get 8.8.4.4 | head -1 | awk '{print $7}'`
     verbose ""
     verbose "Connected to $ssid on interface: $active_card and my IP is $myip."
     verbose ""
     network=wlan
 fi
+myip=`ip route get 8.8.4.4 | head -1 | awk '{print $7}'`
+
+debug ""
+debug "echo $network"
+debug "echo $myip"
+
+exit 1
+
+####################
+#######################
+#####################
+########################
+####################
+#################
 
 
 #
@@ -105,7 +125,7 @@ fi
 if [ "$network == wlan" ] && [ "$ssid" == "$config_home_ssid" ]
   then
     verbose ""
-    verbose "--> Seems you are in Schluckenau..."
+    verbose "--> Seems you are at home!"
     verbose ""
 
     if [[ $debug -eq 1 ]]
