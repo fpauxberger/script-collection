@@ -57,65 +57,48 @@ verbose "****** Full config file ********"
 verbose "********************************"
 verbose ""
 verbose "config home (W)LAN1"
-verbose "  $config_home_ssid"
-verbose "  $config_home_network"
+verbose "  SSID: $config_home_ssid"
 verbose "config nas"
-verbose "  $config_nas_shortname"
-verbose "  $config_nas_homedrive"
-verbose "  $config_nas_mountpoint"
-verbose "  $config_nas_user"
-verbose "  $config_nas_password"
+verbose "  NAS path to home: $config_nas_homedrive"
+verbose "  Local mountpoint: $config_nas_mountpoint"
+verbose "  NAS user: $config_nas_user"
+verbose "  password: $config_nas_password"
 verbose "config local"
-verbose "  $config_luser_luid"
-verbose "  $config_luser_lgid"
+verbose "  Local UID: $config_luser_luid"
+verbose "  Local GID: $config_luser_lgid"
 verbose "config vpn"
-verbose "  $config_vpn_vconnection"
+verbose "  VPN connection: $config_vpn_vconnection"
 verbose ""
 verbose "********************************"
 verbose ""
 
 # Find network devices
-
-wificard=$(sudo lshw -class network -short | grep Wi-Fi | awk  '{ print $2 }')
-  ssid=$(nmcli device status | grep 'wifi.* connected' | awk '{ print $4 }')
-ethernetcard=$(sudo lshw -class network -short | grep Ethernet | awk  '{ print $2 }')
-  lanid=$(nmcli device status | grep 'ethernet.* connected' | awk '{ print $4 }')
-
-verbose ""
-verbose "*** Network configuration dump ***"
-verbose ""
-verbose "Wireless card: >$wificard<"
-verbose "SSID: >$ssid<"
-verbose "Ethernet card: >ethernetcard=<"
-verbose "LANID: >$lanid<"
-
-
-# See if we are connected via wifi or LAN
-
-if [ -z $ssid ] 
-  then
-    verbose "--> We are not connected to a Wifi!"
-    network=lan
+connection=$(nmcli device status | grep -e 'wifi.* connected' -e 'ethernet.* connected')
+if [ -z "$connection" ]
+  then 
+    echo "There seems to be no network connection! Exiting..."
+    exit 1
   else
-    verbose ""
-    verbose "Connected to $ssid on interface: $active_card and my IP is $myip."
-    verbose ""
-    network=wlan
-fi
-myip=`ip route get 8.8.4.4 | head -1 | awk '{print $7}'`
+    echo ""
+    echo "Found at least one an active network connection!"
+    echo "$connection"
+    echo ""
+    if [ -z $ssid ] # prefer LAN over Wifi
+      then 
+        lanid=$(nmcli device status | grep 'ethernet.* connected' | awk '{ print $1 }')
+        myip=`ip route get 8.8.4.4 | head -1 | awk '{print $7}'`
+        echo "We are connected to an LAN on interface $lanid! My IP is $myip."    
+        network=lan
+      else 
+        wificard=$(nmcli device status | grep 'wifi.* connected' | awk '{ print $1 }')
+        ssid=$(nmcli device status | grep 'wifi.* connected' | awk '{ print $4 }')
+        myip=`ip route get 8.8.4.4 | head -1 | awk '{print $7}'`
+        echo "Connected to $ssid on interface $wificard! My IP is $myip."
+        network=wlan
+    fi
+fi 
 
-debug ""
-debug "echo $network"
-debug "echo $myip"
-
-exit 1
-
-####################
-#######################
-#####################
-########################
-####################
-#################
+vverbose "entwork switch: >$network<."
 
 
 #
