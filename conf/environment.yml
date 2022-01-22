@@ -1,12 +1,14 @@
 home:
   ssid: <YOUR_WLAN_SSID>
 nas:
+  nasserver: <NAS_HOST>
   homedrive: //<NAS_HOST>/<PATH>
   mountpoint: <LOCAL_MOUNTPOINT>
   user: <NAS_USER>
+  password: <NAS_USER_PASSWORD>
 luser:
   luid: <LOCAL_UID>
   lgid: <LOCAL_GID>
 vpn:
   vconnection: <YOUR_VPN_CONNECTION>
-
+  
