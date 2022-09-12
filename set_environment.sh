@@ -2,7 +2,10 @@
 
 #
 # Script to check the current LAN settings and
-# set the environment accordingly.
+# mounts my nas server(s) accordingly
+#
+# TODO:
+# - VLAN to home
 # 
 # Possible options:
 #   -v	Sets the output to verbose
@@ -59,11 +62,18 @@ verbose ""
 verbose "config home (W)LAN1"
 verbose "  SSID: $config_home_ssid"
 verbose "config nas"
-verbose "  NAS server name: $config_nas_nasserver"
-verbose "  NAS path to home: $config_nas_homedrive"
-verbose "  Local mountpoint: $config_nas_mountpoint"
-verbose "  NAS user: $config_nas_user"
-verbose "  password: $config_nas_password"
+verbose "  Production: NAS server name: $config_nas_nasserver_prod"
+verbose "  Production: NAS path to home: $config_nas_homedrive_prod"
+verbose "  Production: NAS path to family share: $config_nas_familyshare_prod"
+verbose "  Production: Local mountpoint home: $config_nas_home_mountpoint_prod"
+verbose "  Production: Local mountpoint faily: $config_nas_family_mountpoint_prod"
+verbose "  Production: NAS user: $config_nas_user_prod"
+verbose "  Production: password: $config_nas_password_prod"
+verbose "  Backup: NAS server name: $config_nas_nasserver_bak"
+verbose "  Backup: NAS path to home: $config_nas_homedrive_bak"
+verbose "  Backup: Local mountpoint: $config_nas_mountpoint_bak"
+verbose "  Backup: NAS user: $config_nas_user_bak"
+verbose "  Backup: password: $config_nas_password_bak"
 verbose "config local"
 verbose "  Local UID: $config_luser_luid"
 verbose "  Local GID: $config_luser_lgid"
@@ -88,7 +98,7 @@ if [ -z "$connection" ]
       then 
         lanid=$(nmcli device status | grep 'ethernet.* connected' | awk '{ print $1 }')
         myip=`ip route get 8.8.4.4 | head -1 | awk '{print $7}'`
-        echo "We are connected to an LAN on interface $lanid! My IP is $myip."    
+        echo "We are connected to a LAN on interface $lanid! My IP is $myip."    
         network=lan
       else 
         wificard=$(nmcli device status | grep 'wifi.* connected' | awk '{ print $1 }')
@@ -102,7 +112,7 @@ fi
 verbose "network switch: >$network<."
 
 # Check if we sit at HOME
-check_home=$(ping -c1 $config_nas_nasserver &>/dev/null)
+check_home=$(ping -c1 $config_nas_nasserver_prod &>/dev/null)
 if [ $? -eq 0 ]
   then 
     home=true
@@ -127,12 +137,18 @@ if [ "$home" == "true" ]
         verbose "sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_password,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint"
         exit 0
       else 
-	verbose "sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_password,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint"
-        sudo mount -t cifs -o user=$config_nas_user,password=$config_nas_password,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive $config_nas_mountpoint
+        verbose "Mounting drive(s) from $config_nas_nasserver_prod:"
+	verbose "  user home: sudo mount -t cifs -o user=$config_nas_user_prod,password=$config_nas_password_prod,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive_prod $config_nas_home_mountpoint_prod"
+        sudo mount -t cifs -o user=$config_nas_user_prod,password=$config_nas_password_prod,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive_prod $config_nas_home_mountpoint_prod
+	verbose "  family share: sudo mount -t cifs -o user=$config_nas_user_prod,password=$config_nas_password_prod,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_familyshare_prod $config_nas_family_mountpoint_prod"
+        sudo mount -t cifs -o user=$config_nas_user_prod,password=$config_nas_password_prod,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_familyshare_prod $config_nas_family_mountpoint_prod
         if [ $? -eq 0 ]
           then
-            list=`ls -al $config_nas_mountpoint`
+            list=`mount | grep nas`
+            verbose ""
+            verbose "The following remote mountpoints exist:"
             verbose "$list"
+            verbose ""
             exit 0
           else
             verbose "Unable to mount home drive! Exiting..."
@@ -143,6 +159,9 @@ if [ "$home" == "true" ]
     echo ""
     echo  "--> Looks like you are not at home. This requires some more effort to mount your homedrive. Let's get it done..."
     echo ""
+
+### TODO
+### BACKUP SERVER
 
     ### active_con=$(nmcli con | grep "$active_card")
     ### activ_vpn=$(nmcli con | grep "$ssid")
@@ -202,8 +221,8 @@ if [ "$home" == "true" ]
 	    ###verbose "Tunnel could not be started. Please check that! Exiting..."
  ###           verbose ""
  ###           exit 1
- ###       fi
-    fi
+   ###    fi
+###    fi
 fi
 
 exit 0

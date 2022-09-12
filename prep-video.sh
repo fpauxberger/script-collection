@@ -17,8 +17,8 @@ echo "  >> Device: $devname"
 sleep 2
 
 echo "Set zoom for face-2-face meeting using green screen"
-echo "  >> Running command: v4l2-ctl -d /dev/${devname} --set-ctrl=zoom_absolute=125"
-v4l2-ctl -d /dev/${devname} --set-ctrl=zoom_absolute=125
+echo "  >> Running command: v4l2-ctl -d /dev/${devname} --set-ctrl=zoom_absolute=130"
+v4l2-ctl -d /dev/${devname} --set-ctrl=zoom_absolute=130
 sleep 1
 
 echo

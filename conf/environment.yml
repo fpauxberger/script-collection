@@ -1,11 +1,19 @@
 home:
   ssid: <YOUR_WLAN_SSID>
 nas:
-  nasserver: <NAS_HOST>
-  homedrive: //<NAS_HOST>/<PATH>
-  mountpoint: <LOCAL_MOUNTPOINT>
-  user: <NAS_USER>
-  password: <NAS_USER_PASSWORD>
+  nasserver_prod: <NAS_HOST>
+  homedrive_prod: //<NAS_HOST>/<PATH>
+  familyshare_prod: //<NAS_HOST>/<PATH>
+  mountpoint_prod: <LOCAL_MOUNTPOINT>
+  home_mountpoint_prod: <LOCAL_MOUNTPOINT_1>
+  family_mountpoint_prod: <LOCAL_MOUNTPOINT_2>
+  user_prod: <NAS_USER>
+  password_prod: <NAS_USER_PASSWORD>
+  nasserver_bak: <NAS_HOST>
+  homedrive_bak: //<NAS_HOST>/<PATH>
+  mountpoint_bak: <LOCAL_MOUNTPOINT>
+  user_bak: <NAS_USER>
+  password_bak: <NAS_USER_PASSWORD>
 luser:
   luid: <LOCAL_UID>
   lgid: <LOCAL_GID>
