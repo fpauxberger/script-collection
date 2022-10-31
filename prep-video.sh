@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo
+zoom=150
 
 # Specify the name of your camera you want to use
 # Run something like `lsusb | grep Webcam`
@@ -17,8 +18,8 @@ echo "  >> Device: $devname"
 sleep 2
 
 echo "Set zoom for face-2-face meeting using green screen"
-echo "  >> Running command: v4l2-ctl -d /dev/${devname} --set-ctrl=zoom_absolute=130"
-v4l2-ctl -d /dev/${devname} --set-ctrl=zoom_absolute=130
+echo "  >> Running command: v4l2-ctl -d /dev/${devname} --set-ctrl=zoom_absolute=$zoom"
+v4l2-ctl -d /dev/${devname} --set-ctrl=zoom_absolute=$zoom
 sleep 1
 
 echo
