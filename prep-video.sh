@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo
-zoom=150
+zoom=170
 
 # Specify the name of your camera you want to use
 # Run something like `lsusb | grep Webcam`

@@ -65,8 +65,10 @@ verbose "config nas"
 verbose "  Production: NAS server name: $config_nas_nasserver_prod"
 verbose "  Production: NAS path to home: $config_nas_homedrive_prod"
 verbose "  Production: NAS path to family share: $config_nas_familyshare_prod"
+verbose "  Production: NAS path to third share: $config_nas_autohome_prod"
 verbose "  Production: Local mountpoint home: $config_nas_home_mountpoint_prod"
-verbose "  Production: Local mountpoint faily: $config_nas_family_mountpoint_prod"
+verbose "  Production: Local mountpoint family: $config_nas_family_mountpoint_prod"
+verbose "  Production: Local third mountpoint: $config_nas_family_third_mountpoint_prod"
 verbose "  Production: NAS user: $config_nas_user_prod"
 verbose "  Production: password: $config_nas_password_prod"
 verbose "  Backup: NAS server name: $config_nas_nasserver_bak"
@@ -109,7 +111,10 @@ if [ -z "$connection" ]
     fi
 fi 
 
-verbose "network switch: >$network<."
+verbose ""
+verbose "network connection: >$network<."
+verbose "My IP: >$myip=<"
+verbose ""
 
 # Check if we sit at HOME
 check_home=$(ping -c1 $config_nas_nasserver_prod &>/dev/null)
@@ -119,8 +124,6 @@ if [ $? -eq 0 ]
   else
     home=false
 fi
-
-###echo "home=$home"
 
 #
 # If @home mount NAS. If not start vpn tunnel first and then mount NAS
@@ -138,10 +141,12 @@ if [ "$home" == "true" ]
         exit 0
       else 
         verbose "Mounting drive(s) from $config_nas_nasserver_prod:"
-	verbose "  user home: sudo mount -t cifs -o user=$config_nas_user_prod,password=$config_nas_password_prod,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive_prod $config_nas_home_mountpoint_prod"
+	verbose "  user data: sudo mount -t cifs -o user=$config_nas_user_prod,password=$config_nas_password_prod,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive_prod $config_nas_home_mountpoint_prod"
         sudo mount -t cifs -o user=$config_nas_user_prod,password=$config_nas_password_prod,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_homedrive_prod $config_nas_home_mountpoint_prod
 	verbose "  family share: sudo mount -t cifs -o user=$config_nas_user_prod,password=$config_nas_password_prod,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_familyshare_prod $config_nas_family_mountpoint_prod"
         sudo mount -t cifs -o user=$config_nas_user_prod,password=$config_nas_password_prod,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_familyshare_prod $config_nas_family_mountpoint_prod
+	verbose "  user home: sudo mount -t cifs -o user=$config_nas_user_prod,password=$config_nas_password_prod,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_autohome_prod $config_nas_home_third_mountpoint_prod"
+        sudo mount -t cifs -o user=$config_nas_user_prod,password=$config_nas_password_prod,uid=$config_luser_luid,gid=$config_luser_lgid,nounix,vers=2.0 $config_nas_autohome_prod $config_nas_third_mountpoint_prod
         if [ $? -eq 0 ]
           then
             list=`mount | grep nas`
@@ -162,6 +167,7 @@ if [ "$home" == "true" ]
 
 ### TODO
 ### BACKUP SERVER
+### VPN connection for external mount
 
     ### active_con=$(nmcli con | grep "$active_card")
     ### activ_vpn=$(nmcli con | grep "$ssid")

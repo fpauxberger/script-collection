@@ -4,9 +4,10 @@ nas:
   nasserver_prod: <NAS_HOST>
   homedrive_prod: //<NAS_HOST>/<PATH>
   familyshare_prod: //<NAS_HOST>/<PATH>
-  mountpoint_prod: <LOCAL_MOUNTPOINT>
+  autohome_prod: //<NAS_HOST>/<PATH>
   home_mountpoint_prod: <LOCAL_MOUNTPOINT_1>
   family_mountpoint_prod: <LOCAL_MOUNTPOINT_2>
+  third_mountpoint_prod: <LOCAL_MOUNTPOINT_3>
   user_prod: <NAS_USER>
   password_prod: <NAS_USER_PASSWORD>
   nasserver_bak: <NAS_HOST>
