@@ -42,9 +42,19 @@ echo
 case $mydistro in
   Ubuntu) 
     sudo apt update && sudo apt upgrade
+    if [ -f /var/run/reboot-required ]; then
+      echo
+      echo '   ----> Your system needs to be rebooted!'
+      echo
+    else
+      echo
+      echo 'No system changes done that require a reboot!'
+      echo
+    fi
     ;;
   Fedora) 
     sudo dnf upgrade --refresh
+    sudo needs-restarting -r
     ;;
   *)
     echo "Your distro currently is not supported!"
@@ -54,8 +64,6 @@ esac
 echo "********************************************"
 echo 
 echo 
-
-
 echo "********************************************"
 echo "********************************************"
 echo "  >>>>> All done"
