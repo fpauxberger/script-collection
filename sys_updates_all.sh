@@ -16,6 +16,7 @@ echo "**********************************************"
 
 
 # flatpak updates
+echo
 echo "Let's see if there are updates for flatpak:"
 sudo flatpak update
 echo "********************************************"
@@ -27,9 +28,29 @@ sudo snap refresh
 echo "********************************************"
 echo 
 
-# deb packages updates
-echo "And finally refresh the deb repos and check for updates:"
-sudo apt update && sudo apt upgrade
+# packages updates
+echo 
+echo "And finally refresh system repos and check for updates:"
+echo "Checked for Fedora and Ubuntu distros"
+echo 
+echo 
+
+mydistro=$(grep ^NAME /etc/*release | cut -d '=' -f2 | sed 's/"//g' | awk '{ print $1 }')
+echo "Looks like you are running $mydistro!"
+echo 
+
+case $mydistro in
+  Ubuntu) 
+    sudo apt update && sudo apt upgrade
+    ;;
+  Fedora) 
+    sudo dnf upgrade --refresh
+    ;;
+  *)
+    echo "Your distro currently is not supported!"
+    ;;
+esac
+
 echo "********************************************"
 echo 
 echo 
