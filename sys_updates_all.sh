@@ -8,32 +8,51 @@
 # paux 20250511
 #
 #
-echo "**********************************************"
-echo "**********************************************"
-echo "  >>>>> Check all package systems for updates "
-echo "**********************************************"
-echo "**********************************************"
-
+echo "************************************************"
+echo "************************************************"
+echo "  >>> Check all package systems for updates <<< "
+echo "************************************************"
+echo "************************************************"
+echo
+echo
 
 # flatpak updates
 echo
-echo "Let's see if there are updates for flatpak:"
-sudo flatpak update
-echo "********************************************"
-echo 
+echo "------------------------------------------------"
+echo "FLATPAK update check"
+echo "------------------------------------------------"
+
+if command -v flatpak > /dev/null 2>&1; then
+  sudo flatpak update
+else
+  echo
+  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+  echo "!!! flatpak is not used on this system !!!      "
+  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+  echo
+fi
 
 # snap updates
-echo "Checking snap for upates:"
-sudo snap refresh
-echo "********************************************"
-echo 
+echo
+echo "------------------------------------------------"
+echo "SNAP update check"
+echo "------------------------------------------------"
+
+if command -v snap > /dev/null 2>&1; then
+  sudo snap refresh
+else
+  echo
+  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+  echo "!!! snap is not used on this system !!!         "
+  echo "++++++++++++++++++++++++++++++++++++++++++++++++"
+  echo
+fi
 
 # packages updates
-echo 
-echo "And finally refresh system repos and check for updates:"
-echo "Checked for Fedora and Ubuntu distros"
-echo 
-echo 
+echo
+echo "------------------------------------------------"
+echo "System repo update check                        "
+echo "------------------------------------------------"
 
 mydistro=$(grep ^NAME /etc/*release | cut -d '=' -f2 | sed 's/"//g' | awk '{ print $1 }')
 echo "Looks like you are running $mydistro!"
@@ -60,14 +79,12 @@ case $mydistro in
     echo "Your distro currently is not supported!"
     ;;
 esac
-
-echo "********************************************"
 echo 
 echo 
-echo "********************************************"
-echo "********************************************"
-echo "  >>>>> All done"
-echo "********************************************"
-echo "********************************************"
+echo "************************************************"
+echo "************************************************"
+echo "            >>> All done <<<                    "
+echo "************************************************"
+echo "************************************************"
 
 exit 0
