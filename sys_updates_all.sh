@@ -23,7 +23,7 @@ echo "FLATPAK update check"
 echo "------------------------------------------------"
 
 if command -v flatpak > /dev/null 2>&1; then
-  sudo flatpak update
+  flatpak update
 else
   echo
   echo "++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -73,10 +73,14 @@ case $mydistro in
     ;;
   Fedora) 
     sudo dnf upgrade --refresh
+    echo
     sudo needs-restarting -r
+    echo
     ;;
   *)
+    echo
     echo "Your distro currently is not supported!"
+    echo
     ;;
 esac
 echo 
